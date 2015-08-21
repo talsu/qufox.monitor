@@ -18,15 +18,17 @@ MongoClient.connect(mongodbUrl, function(err, db) {
 
 	var tcpServer = new TcpSocketServer(tcpServerPort);
 
-	tcpServer.on('data', function (data){		
-		if (!data || !data.header || !data.payload) {
-			debug('Bad data format.');
+	tcpServer.on('data', function (telegram){		
+		if (!telegram || !telegram.type || !telegram.data) {
+			debug('Bad telegram format.');
 		}
 		else
 		{
-			db.collection(data.header).insert(data.payload, function (err, docs){
+			var type = telegram.type;
+			delete telegram.type;
+			db.collection(type).insert(telegram, function (err, docs){
 				if (err) {
-					debug('collection['+data.header+'] insert Error - ' + err);
+					debug('collection['+type+'] insert Error - ' + err);
 				}
 			});
 		}
