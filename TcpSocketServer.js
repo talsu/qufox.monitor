@@ -2,8 +2,9 @@ var net = require('net');
 var util = require('util');
 var debug = require('debug')('qufoxMonitor:TcpServer');
 var events = require("events");
+var tools = require('./tools');
 
-exports.TcpSocketServer = (function(){
+module.exports = (function(){
 	function TcpSocketServer(port) {
 		var self = this;
 		var server = net.createServer(function(socket){
@@ -55,10 +56,10 @@ exports.TcpSocketServer = (function(){
 				debug('Socket End');
 			});
 		});
+
+		self.server = server;
+		self.port = port;
 		
-		server.listen(port, function() {
-			debug('Server bound');
-		});
 
 		function onData(data){
 			var obj = null;
@@ -74,6 +75,21 @@ exports.TcpSocketServer = (function(){
 	}
 
 	util.inherits(TcpSocketServer, events.EventEmitter);
+
+	TcpSocketServer.prototype.listen = function (callback) {
+		var self = this;
+		self.server.listen(self.port, function (err) {
+			if (err) {
+				debug(err);
+			}
+			else {
+				debug('Server bound');	
+			}
+			
+			if (tools.isFunction(callback)) callback(err);
+		});
+	};
+
 
 	return TcpSocketServer;
 })();
