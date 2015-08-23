@@ -6,6 +6,7 @@ var TcpSocketServer = require('./TcpSocketServer');
 var Database = require('./Database');
 var WebServer = require('./WebServer');
 var HttpServer = require('./HttpServer');
+var WebSocketServer = require('./WebSocketServer');
 
 
 var mongodbUrl = 'mongodb://127.0.0.1:27017/qufoxMonitor';
@@ -16,23 +17,29 @@ var database = new Database(mongodbUrl);
 var tcpServer = new TcpSocketServer(tcpServerPort);
 var webServer = new WebServer();
 var httpServer = new HttpServer(port, webServer);
-//var socketServer = new WebSocketServer(httpServer);
+var socketServer = new WebSocketServer(httpServer);
 
 async.waterfall([
-		function (callback) { database.connect(callback); }, 
-		function (callback) { httpServer.listen(callback); },
-		function (callback) { tcpServer.listen(callback); }
-		
-	],
-	function (err, result) {
-		if (err) {
-			debug(err);
-		}
-		else {
-			tcpServer.on('data', database.AddTelegram);
-		}
-	});
+	function (callback) { database.connect(callback); }, 
+	function (callback) { httpServer.listen(callback); },
+	function (callback) { tcpServer.listen(callback); }		
+],
+function (err, result) {
+	if (err) {
+		debug(err);
+	}
+	else {
+		startProcess();
+	}
+});
 
+
+function startProcess(){
+	tcpServer.on('data', function (data) { 
+		database.AddTelegram(data); 
+		socketServer.broadcast('data', data);
+	});
+}
 
 // debug('Try Mongodb connect ... (' + mongodbUrl + ')');
 // MongoClient.connect(mongodbUrl, function(err, db) {

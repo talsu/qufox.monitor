@@ -24,7 +24,8 @@ module.exports = (function(){
 					receiveBuffer = receiveBuffer.slice(packetLength);					
 					onData(payloadString);
 
-					if (receiveBuffer.length > 0) {						
+					if (receiveBuffer.length > 0) {
+						debug('remain ' + receiveBuffer.length + ' - read again.');
 						readBuffer();
 					}
 				}
@@ -65,12 +66,13 @@ module.exports = (function(){
 			var obj = null;
 			try {
 				obj = JSON.parse(data.toString());
-				debug(util.inspect(obj, false, null, true));
-				self.emit('data', obj);
+				debug(util.inspect(obj, false, null, true));				
 			}
 			catch (err) {
 				debug('Data error - ' + err + ' : ' + data.toString());
 			}
+
+			self.emit('data', obj);
 		}
 	}
 
