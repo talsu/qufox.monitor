@@ -23,7 +23,7 @@ module.exports = (function() {
 				debug('Mongodb connection Error - ' + err);
 			}
 
-			if (tools.isFunction(callback)) callback(err, db);
+			if (tools.isFunction(callback)) callback(err);
 		});
 	};
 

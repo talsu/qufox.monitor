@@ -4,16 +4,25 @@ var MongoClient = require('mongodb').MongoClient;
 var async = require('async');
 var TcpSocketServer = require('./TcpSocketServer');
 var Database = require('./Database');
+var WebServer = require('./WebServer');
+var HttpServer = require('./HttpServer');
 
 
 var mongodbUrl = 'mongodb://127.0.0.1:27017/qufoxMonitor';
 var tcpServerPort = 3200;
+var port = 3300;
 
 var database = new Database(mongodbUrl);
 var tcpServer = new TcpSocketServer(tcpServerPort);
+var webServer = new WebServer();
+var httpServer = new HttpServer(port, webServer);
+//var socketServer = new WebSocketServer(httpServer);
+
 async.waterfall([
 		function (callback) { database.connect(callback); }, 
+		function (callback) { httpServer.listen(callback); },
 		function (callback) { tcpServer.listen(callback); }
+		
 	],
 	function (err, result) {
 		if (err) {

@@ -83,7 +83,7 @@ module.exports = (function(){
 				debug(err);
 			}
 			else {
-				debug('Server bound');	
+				debug('Server bound on port ' + self.port);	
 			}
 			
 			if (tools.isFunction(callback)) callback(err);
